@@ -87,8 +87,8 @@ app.post(`/hobby`, async (req, res) => {
         user : {
           // @ts-ignore
           connectOrCreate: hobbyData.user.map(user1 => ({
-            where: { name: user1 },
-            create: { name: user1 }
+            where: { name: user1 ,image:user1},
+            create: { name: user1 ,image:user1}
           }))
         }
       },
