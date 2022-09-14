@@ -25,16 +25,34 @@ app.get(`/users/:id`, async (req, res) => {
   }
 });
 app.post(`/users`, async (req, res) => {
+    const userData  = {
+        name: req.body.name,
+        image: req.body.image,
+        email:req.body.email,
+        hobby: req.body.hobby ? req.body.hobby : []
+      }
+    
     const newuser = await prisma.user.create({
-      data: req.body,
-      include: { hobby: true },
-    });
+        data: {
+            name: userData.name,
+            image: userData.image,
+            email:userData.email,
+            hobby: {
+              // @ts-ignore
+              connectOrCreate: userData.hobby.map(hobbi => ({
+                where: { name: hobbi },
+                create: { name: hobbi }
+              }))
+            }
+          },
+          include: { hobby: true }
+        })
     res.send(newuser);
   });
   
-  app.delete(`/users`, async (req, res) => {
-      const id=Number(req.params.id)
-    const deletedUser = await prisma.user.delete({ where: { id} });
+  app.delete(`/users/:id`, async (req, res) => {
+    //   const id=Number(req.params.id)
+    const deletedUser = await prisma.user.delete({ where: { id : Number(req.params.id)} });
     res.send(deletedUser);
   });
   //hobby
@@ -57,14 +75,29 @@ app.get(`/hobby/:id`, async (req, res) => {
 });
 
 app.post(`/hobby`, async (req, res) => {
+    const hobbyData  = {
+        name: req.body.name,
+        image:req.body.image,
+        user: req.body.user ? req.body.user : []
+      }            
   const newhobby = await prisma.hobby.create({
-    data: req.body,
-    include: { user: true },
-  });
+    data: {
+        name: hobbyData.name,
+        image: hobbyData.image,
+        user : {
+          // @ts-ignore
+          connectOrCreate: hobbyData.user.map(user1 => ({
+            where: { name: user1 },
+            create: { name: user1 }
+          }))
+        }
+      },
+      include: { user: true }
+    })
   res.send(newhobby);
 });
 
-app.delete(`/hobby`, async (req, res) => {
+app.delete(`/hobby/:id`, async (req, res) => {
     const id=Number(req.params.id)
   const deletedHobby = await prisma.hobby.delete({ where: { id} });
   res.send(deletedHobby);
